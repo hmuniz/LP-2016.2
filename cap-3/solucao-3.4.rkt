@@ -1,5 +1,4 @@
 #lang racket
-(require racket/trace)
 
 (define (make-account balance password)
   (let ((count-erro 0))
