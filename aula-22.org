@@ -1,0 +1,66 @@
+#+Title: Aula 22
+#+Date: <2016-10-17 Mon>
+
+Sobre os projetos, sugero que os alunos invitam em projetos que possam
+ser disponibilizados como bibliotecas Racket 
+
+https://pkgs.racket-lang.org
+
+Isto seria um excelente resultado para os projetos além de apenas um
+relatório acompanhado de um código que não terá uso depois do
+curso. Alternativamente, os grupos podem tentar contribuir com algum
+projeto já existente. Notem que para efetivamente distribuir um código
+que potencialmente poderá ser organizado em vários arquivos, será
+necessário entender o que são módulos e pacotes:
+
+https://docs.racket-lang.org/guide/modules.html
+
+Como eu disse em sala, o LoL (https://goo.gl/H2qnNs) usa values para
+isso. Para saber mais como lidar com =values=, vejam
+https://goo.gl/IitGiv.
+
+#+BEGIN_SRC lisp
+  (let ((counter 0))
+    (values
+     (lambda () (incf counter))
+     (lambda () (decf counter))))
+#+END_SRC
+
+E =values= também existe em Racket. 
+
+#+BEGIN_EXAMPLE
+> (values 1 2)
+1
+2
+#+END_EXAMPLE
+
+Sobre https://goo.gl/H2qnNs, vale muito ler o trecho abaixo, ver a
+solução do block-scanner e pensar sobre:
+
+#+BEGIN_QUOTE
+   Unfortunately, most lisp programming books don't provide realistic
+   examples of closure usage, leaving readers with the inaccurate
+   impression that closures are only good for toy examples like
+   counters. Nothing could be further from the truth. Closures are the
+   building blocks of lisp. Environments, the functions defined inside
+   those environments, and macros like defun that make using them
+   convenient, are all that are needed for modelling any problem. This
+   book aims to stop beginning lisp programmers used to object-based
+   languages from acting upon their gut instinct of reaching for
+   systems like CLOS. While CLOS does have certain things to offer the
+   professional lisp programmer, do not use it when a lambda will
+   suffice.
+
+   In order to motivate the use of closures, a realistic example is
+   presented: block-scanner. The problem block-scanner solves is that
+   for some forms of data transfer the data is delivered in groups
+   (blocks) of uncertain sizes. These sizes are generally convenient
+   for the underlying system but not for the application programmer,
+   often being determined by things like operating system buffers,
+   hard drive blocks, or network packets. Scanning a stream of data
+   for a specific sequence requires more than just scanning each block
+   as it comes in with a regular, stateless procedure. We need to keep
+   state between the scanning of each block because it is possible
+   that the sequence we are scanning for will be split between two (or
+   more) blocks.
+#+END_QUOTE

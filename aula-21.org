@@ -1,0 +1,76 @@
+#+Title: Aula 21
+#+Date: <2016-10-14 Fri>
+
+Falamos um pouco sobre literate programming, vide referências
+abaixo. Mostrei exemplo do Org-Mode do Emacs. Em Racket existe o
+[[https://docs.racket-lang.org/scribble/index.html][Scribble]].
+
+Sobre a nota https://goo.gl/5ti6TM 
+
+#+BEGIN_QUOTE
+  In fact, we suspect that these problems cannot be adequately
+  addressed in terms of computer-language design alone, without also
+  drawing on work in knowledge representation and automated reasoning.
+#+END_QUOTE
+
+Por que knowledge representation? Bem, vejam que o exemplo que o livro
+usa são números e operação sobre números. Eles constituem uma classe
++/- bem comportada com uma hierarquia bem simples, fig 2.25.
+
+Na figura 2.26, a 'organizar' em tipos e hierarquia deles o domínio de
+figuras geométricas já é bem mais complicado. Imaginem domínios mais
+específicos ainda como geologia etc.
+
+Neste sentido knowledge representation é uma disciplina fundamental de
+modelagem aplicavél para este problema dos tipos.
+
+automated reasoning... bem, aqui a coisa fica mais interessante.
+
+- https://wiki.haskell.org/Type_inference
+- https://www.youtube.com/watch?v=ZGqKsalJi4s -- só para deixar vcs
+  curiosos! 
+
+Sobre literate programming e https://goo.gl/x93rjP que diz:
+
+#+BEGIN_QUOTE
+  We will not attempt to develop a complete algebraic-manipulation
+  system here. Such systems are exceedingly complex programs,
+  embodying deep algebraic knowledge and elegant algorithms.
+#+END_QUOTE
+
+Vale assistir:
+
+https://www.youtube.com/watch?v=Av0PQDVTP4A 
+
+* Exemplo
+
+#+name: ts
+#+BEGIN_SRC R :results value
+a <- 1:10
+b <- a * 10
+b
+#+END_SRC
+
+#+RESULTS:
+|  10 |
+|  20 |
+|  30 |
+|  40 |
+|  50 |
+|  60 |
+|  70 |
+|  80 |
+|  90 |
+| 100 |
+
+#+BEGIN_SRC lisp :var dados=ts
+  (mapcar (lambda (n) (* (car n) (car n))) dados)
+#+END_SRC
+
+#+RESULTS:
+| 100 | 400 | 900 | 1600 | 2500 | 3600 | 4900 | 6400 | 8100 | 10000 |
+
+* Referências
+
+- http://orgmode.org/talks.html
+- https://www.jstatsoft.org/article/view/v046i03/
