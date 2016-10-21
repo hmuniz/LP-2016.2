@@ -1,0 +1,162 @@
+#+Title: Aula 24
+#+Date: <2016-10-21 Fri>
+
+* Dúvidas
+
+- Dúvida Rafael Mesquita: lista encadeada vs linguagem vs array.
+- Comentários sobre email Paula e Pedro sobre responder questões
+  teóricas.
+  - http://orgmode.org
+  - [[https://docs.racket-lang.org/scribble/index.html][Scribble]]
+
+* Código usado na sala
+
+Tarefas para próxima quarta:
+
+1. Expandir a gramática =english-1= para se familiarizarem com o
+   código.
+
+2. Reescrever o reconhecedor em Racket.
+
+3. Completar as funções do gerador.
+
+#+BEGIN_SRC lisp
+  (defparameter english-1
+    '((Initial (1))
+      (Final (9))
+      (From 1 to 3 by NP)
+      (From 1 to 2 by DET)
+      (From 2 to 3 by N)
+      (From 3 to 4 by BV)
+      (From 4 to 5 by ADV)
+      (From 4 to 5 by |#|)
+      (From 5 to 6 by DET)
+      (From 5 to 7 by DET)
+      (From 5 to 8 by |#|)
+      (From 6 to 7 by ADJ)    
+      (From 6 to 6 by MOD)
+      (From 7 to 9 by N)
+      (From 8 to 8 by MOD)
+      (From 8 to 9 by ADJ)
+      (From 9 to 4 by CNJ)
+      (From 9 to 1 by CNJ)))
+
+  (defun initial-nodes (network)
+    (nth 1 (assoc 'Initial network)))
+
+  (defun final-nodes (network)
+    (nth 1 (assoc 'Final network)))
+
+  (defun transitions (network)
+    (cddr network))
+
+  (defun trans-node (transition)
+    (getf transition 'From))
+
+  (defun trans-newnode (transition)
+    (getf transition 'to))
+
+  (defun trans-label (transition)
+    (getf transition 'by))
+
+
+  (defparameter abbreviations
+    '((NP kim sandy lee)
+      (DET a the her)
+      (N consumer man woman)
+      (BV is was)
+      (CNJ and or)
+      (ADJ happy stupid)
+      (MOD very)
+      (ADV often always sometimes))) 
+
+
+  (defun recognize (network tape)
+    (catch 'stop
+      (dolist (initialnode (initial-nodes network))
+        (recognize-next initialnode tape network))
+      nil))
+
+  (defun recognize-next (node tape network)
+    (if (and (null tape) (member node (final-nodes network)))
+        (throw 'stop t)
+        (dolist (transition (transitions network))
+          (if (equal node (trans-node transition))
+              (dolist (newtape (recognize-move (trans-label transition) tape))
+                (recognize-next (trans-newnode transition) newtape network))))))
+
+  (defun recognize-move (label tape)
+    (if (or (equal label (car tape))
+            (member (car tape) (assoc label abbreviations)))
+        (list (cdr tape))
+        (if (equal label '|#|)
+            (list tape)
+            nil)))
+
+  (defun generate-move (label tape)
+    "...")
+
+  (defun generate-next (node tape network)
+    "...")
+
+  (defun generate (network)
+    (dolist (initialnode (initial-nodes network))
+      (generate-next initialnode nil network)))
+#+END_SRC
+
+* Nest Steps
+
+Usando autômatos também podemos operar sobre dois ou mais /tapes/ de
+forma simultânea. Podemos, por exemplo, escrever um tradutor que
+reconhece uma sequência de símbolos de um /tape/ e gera uma outra
+sequências de símbolos no outro /tape/.
+
+#+BEGIN_SRC lisp
+  (defparameter english-french-1
+    '((Initial (1))
+      (Final (5))
+      (From 1 to 2 by WH)
+      (From 2 to 3 by BE)
+      (From 3 to 4 by DET)
+      (From 4 to 5 by NOUN)))
+
+  (defparameter abbreviations
+    '((WH (where ou))
+      (BE (is est))
+      (DET (the |#|))
+      (NOUN (exist la_sortie) (policeman le_gendarme)
+       (shop la_boutique) (toilet la_toilette))))
+
+  (defun transduce-move (label tape)
+    (if (listp label)
+        (let (results)
+          (dolist (newinput (recognize-move (car label) (car tape)))
+            (dolist (newoutput (generate-move (cadr label) (cadr tape)))
+              (setq results (cons (list newinput newoutput) results))))
+          results)
+        (if (equal label '|#|)
+            (list tape)
+            (if (assoc label abbreviations)
+                (transduce-move-list (cdr (assoc label abbreviations)) tape)))))
+
+  (defun transduce-move-list (labels tape)
+    (if (null labels)
+        nil
+        (append (transduce-move (car labels) tape)
+                (transduce-move-list (cdr labels) tape))))
+
+  (defun transduce-next (node tape network)
+    (if (and (null (car tape))
+             (member node (final-nodes network)))
+        (throw 'stop (cadr tape))
+        (dolist (transition (transitions network))
+          (if (equal node (trans-node transition))
+              (dolist (newtape (transduce-move (trans-label transition) tape))
+                (transduce-next (trans-newnode transition) newtape network))))))
+
+  (defun transduce (network tape)
+    (catch 'stop
+      (dolist (initialnode (initial-nodes network))
+        (transduce-next initialnode (list tape nil) network))))
+#+END_SRC
+

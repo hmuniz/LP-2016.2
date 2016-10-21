@@ -1,0 +1,5 @@
+#+Title: Aula 23
+#+Date: <2016-10-19 Mon>
+
+Falamos sobre o modelo de computação com mudança de estados e objetos.
+
