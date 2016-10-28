@@ -1,16 +1,8 @@
 #lang racket
+
 (define (fringe tree)
   (cond ((null? tree) empty)
         ((not (pair? tree)) (list tree))
         (else (append (fringe (car tree))
                       (fringe (cdr tree))))))
 
-(define (fring2 list)
-  (define (iter list out)
-    (cond ((null? list) (reverse out))
-          ((pair? (car list))
-           (iter (car list) out))
-          (else (iter (cdr list)
-                      (cons (car list)
-                            out)))))
-  (iter list empty))

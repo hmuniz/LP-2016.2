@@ -1,0 +1,21 @@
+#+Title: Aula 25
+#+Date: <2016-10-24 Mon>
+
+Acabamos discutindo durante boa parte da aula o tratamento de
+excessões em CL e Racket. Terminamos com o exemplo abaixo suficiente
+para reproduzir em Racket os códigos da aula anterior.
+
+#+BEGIN_SRC scheme
+  (define (teste a)
+    (if (> a 10)
+        (raise a #t)
+        (raise #t #t)))
+
+  (define (main)
+    (with-handlers ((number? (lambda (n)
+                              (+ n 5)))
+                    (boolean?
+                     (lambda (s) s)))
+                   (teste "exemplo!")))
+#+END_SRC
+

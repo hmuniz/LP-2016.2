@@ -4,10 +4,10 @@
   (cons a b))
 
 (define (lower-bound x)
-  (min (car x) (cdr x)))
+  (min (car x)))
 
 (define (upper-bound x)
-  (max (car x) (cdr x)))
+  (max (cdr x)))
 
 (define (sub-interval x y)
   (make-interval (- (lower-bound x) (upper-bound y))

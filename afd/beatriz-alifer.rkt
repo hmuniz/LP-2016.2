@@ -1,0 +1,137 @@
+#lang racket
+
+(define english-1
+  '((Initial (1))
+    (Final (12))
+    ;subjects
+    (From 1 to 2 by DET)   
+    (From 1 to 4 by NP)    
+    (From 2 to 3 by ADJ)
+    (From 2 to 3 by |#|)   
+    (From 3 to 4 by N)     
+    (From 4 to 1 by CNJ)   ;;;	Compound Subjects - "sandy and the man ..."
+    ;; predicates
+    (From 4 to 5 by BV)    
+    (From 5 to 6 by ADV)   
+    (From 5 to 6 by |#|)   
+    (From 6 to 7 by DET)   
+    (From 6 to 9 by DET)
+    (From 6 to 10 by |#|)  
+    (From 7 to 8 by MOD)   ; Doesn't allow "...is a very woman"
+    (From 7 to 9 by |#|)  
+    (From 8 to 8 by MOD)   
+    (From 8 to 9 by ADJ)   
+    (From 9 to 9 by ADJ)   
+    (From 9 to 11 by N)   
+    (From 10 to 10 by MOD)
+    (From 10 to 11 by ADJ)
+    (From 11 to 1 by CNJ)
+    (From 11 to 5 by ADJ) 
+    (From 11 to 10 by CNJ)
+    (From 11 to 12 by end)));
+
+(define (initial-nodes network)
+  (list-ref (assoc 'Initial network) 1))
+
+(define (final-nodes network)
+  (list-ref (assoc 'Final network) 1))
+
+(define (transitions network)
+  (cddr network))
+
+(define (trans-node transition)
+  (getf transition 'From))
+
+(define (trans-newnode transition)
+  (getf transition 'to))
+
+(define (trans-label transition)
+  (getf transition 'by))
+
+(define abbreviations
+  '((NP kim sandy lee)
+    (DET a the her)
+    (N consumer man woman)
+    (BV is was)
+    (CNJ and or)
+    (ADJ happy stupid)
+    (MOD very)
+    (|#|) ;Avoids the error "(reconize-move |#| tape)".
+    (end)
+    (ADV often always sometimes)))
+
+(define (recognize network tape)
+  (with-handlers ([(lambda (s) (equal? s 'stop)) (lambda (s) #t)])
+    (for ((initialnode (initial-nodes network)))
+      (recognize-next initialnode tape network))
+    #f))
+
+(define (recognize-next node tape network)
+  (if (and (null? tape) (member node (final-nodes network)))
+      (raise 'stop #t)
+      (for ((transition (transitions network)))
+        (if (equal? node (trans-node transition))
+            (for ((newtape (recognize-move (trans-label transition) tape)))
+              (recognize-next (trans-newnode transition) newtape network))
+            'pass))))
+
+(define (recognize-move label tape)
+  (if (null? tape)
+      (if (equal? label 'end)
+          (list null)
+          null)
+      (if (or (equal? label (car tape))
+              (member (car tape) (assoc label abbreviations)))
+          (list (cdr tape))
+          (if (equal? label '|#|)
+              (list tape)
+              null))))
+
+(define (generate network max-size)
+  (for ((initialnode (initial-nodes network)))
+    (generate-next initialnode null network max-size)))
+
+(define (generate-next node tape network max-size)
+  (cond ((member node (final-nodes network))
+         (displayln tape))
+        ((> (length tape) max-size);max size of the tape
+         (displayln (append tape '(...))))
+        (else
+         (for ((transition (transitions network)))
+           (if (equal? node (trans-node transition))
+               (for ((newtape (generate-move (trans-label transition))))
+                 (generate-next (trans-newnode transition)
+		 ;; remove is necessary because of the case |#| in
+		 ;; generate-move.
+                                   (remove '() (append tape (list newtape))) 
+                    		               network
+                                max	       -size))
+               'pass)))))	
+
+(define (generate-move label)
+  (if (or (equal? '|#| label)
+          (equal? 'end label))
+      '(())
+      (cdr (assoc label abbreviations)))) ;return all words of the label
+
+(define (getf items key)
+  (cond ((null? items) null)
+        ((null? (cdr items)) null)
+        ((eq? (car items) key) (cadr items))
+        (else (getf (cddr items) key))))
+
+(require racket/trace)
+;(trace recognize-next)
+;(trace recognize-move)
+;(trace generate-next)
+;(trace generate-move)
+
+(define simple
+  '((Initial (1))
+    (Final (6))
+    (From 1 to 2 by NP)
+    (From 2 to 3 by BV)
+    (From 3 to 4 by |#|)
+    (From 4 to 5 by ADJ)
+    (From 5 to 6 by end)
+    (From 5 to 1 by CNJ)))
