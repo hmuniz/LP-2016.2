@@ -1,4 +1,5 @@
 #lang racket
+
 (define english-1
   '((Initial (1))
     (Final (9))
@@ -32,8 +33,7 @@
     (From 5 to 7 by V)
     (From 6 to 6 by ADVI)
     (From 6 to 8 by ADJP)
-    (From 7 to 8 by ADVI)
-    ))    
+    (From 7 to 8 by ADVI)))    
     
 
 (define (getf lst key (default null))
@@ -44,7 +44,6 @@
 
 (define (initial-nodes network)
   (list-ref (assoc 'Initial network) 1))
-
 
 (define (final-nodes network)
   (list-ref (assoc 'Final network) 1))
@@ -78,8 +77,7 @@
     (VLB vai)
     (V trabalhar estudar jogar)
     (ADVI muito)
-    (ADJP importante legal interessante)
-    ))
+    (ADJP importante legal interessante)))
 
 (define (recognize network tape)
   (with-handlers ((boolean? (lambda (z) z)))

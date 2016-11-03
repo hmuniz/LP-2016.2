@@ -22,7 +22,6 @@
     (From 10 to 11 by ADV)
     (From 11 to 1 by CNJ)
     (From 11 to 4 by CNJ)
-    ;PERGUNTAS
     (From 12 to 14 by NP)
     (From 12 to 13 by DET)
     (From 13 to 14 by N)
@@ -67,23 +66,19 @@
     (ADJ happy stupid silly)
     (MOD very)
     (ADV often always sometimes)
-    (PT ?)
-    (|#|  )))
+    (PT ?)))
 
 (define (recognize network tape)
-  (with-handlers ([boolean?
-                   (lambda (s) s)]
-                  (empty?
-                   (lambda (s)
-                     #f)))
+  (with-handlers ([symbol? (lambda (s) s)]
+                  (empty? (lambda (s) #f)))
     (for ((initialnode (initial-nodes network)))
       (recognize-next initialnode tape network))))
 
 (define (recognize-next node tape network)
   (if (empty? tape)
       (if (member node (final-nodes network))
-          (raise #t #t)
-          (raise '() #t))
+          (raise 'ok #t)
+          (raise 'failed #f))
       (for ((transition (transitions network)))
         (if (eq? node (trans-node transition))
             (for ((newtape (recognize-move (trans-label transition) tape)))
@@ -108,7 +103,8 @@
       (for ((transition (transitions network)))
        (if (eq? node (trans-node transition))
             (for ((newtapes (generate-move (trans-label transition) tape)))
-              (generate-next  (trans-newnode transition) (append tape (list newtapes)) network))
+              (generate-next  (trans-newnode transition)
+                              (append tape (list newtapes)) network))
             false))))
 
 (define (generate network)

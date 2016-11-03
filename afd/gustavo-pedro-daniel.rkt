@@ -1,7 +1,5 @@
 #lang racket
 
-(require racket/trace)
-
 (require rackunit)
 
 (define english-1
@@ -75,24 +73,19 @@
     (PONT  ! ?  )))
 
 (define (recognize network tape)
-  ;; retorna t se reconhecer o tape - retorna null se não reconhecer
-  ;; quando passamos um tape que não termina em sinal de pontuação, ele retorna '()
   (call/cc (lambda (return)
              (define (recognize-next node tape network)
                (if (null? tape)
                    (if (member node (final-nodes network))
                        (return #t)
                        (return '()))
-                        ; successo
                    (for ([transition (transitions network)])
-                     ;; testa cada transição da rede
-                     (when (equal? node (trans-node transition)) ; if it starts at the right node
+                     (when (equal? node (trans-node transition)) 
                        (for ([newtape (recognize-move (trans-label transition) tape)])
-                         ;; testa cada valor possível
                          (recognize-next (trans-newnode transition) newtape network))))))
              (for ([initialnode (initial-nodes network)])
                (recognize-next initialnode tape network))
-             null))) ; falha em reconhecer
+             null)))
 
 (define (recognize-move label tape)
   (if (or (eq? label (car tape))
@@ -114,21 +107,22 @@
          (for ([transition (transitions network)])
            (when (equal? node (trans-node transition))
              (for ([newtape (generate-move (trans-label transition) tape)])
-               (generate-next (trans-newnode transition) (append tape (list newtape)) network size)))))))
+               (generate-next (trans-newnode transition)
+                              (append tape (list newtape))
+                              network size)))))))
 
 (define (generate-move label tape)
   (if (eq? '|#| label )           
       '()
       (cdr (assoc label abbreviations))))
 
-
-(check-equal? (recognize english-1 '(kim  ? )) #t)
-(check-equal? (recognize english-1 '(kim eu ? )) '())
-(check-equal? (recognize english-1 '(pedro  ? )) '())
-(check-equal? (recognize english-1 '(kim is happy  )) '())
+(check-equal? (recognize english-1 '(kim ?)) #t)
+(check-equal? (recognize english-1 '(kim eu ?)) '())
+(check-equal? (recognize english-1 '(pedro ?)) '())
+(check-equal? (recognize english-1 '(kim is happy)) '())
 (check-equal? (recognize english-1 '(esse exercício é foda para caralho)) '())
 
-(recognize english-1 '(kim was happy  ))
+(recognize english-1 '(kim was happy))
 (generate english-1 3)
 (generate english-1 2)
 (generate english-1 1)

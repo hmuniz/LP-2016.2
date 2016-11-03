@@ -1,7 +1,5 @@
 #lang racket
 
-(require racket/trace)
-
 (define english-1
   '((Initial (1))
     (Final (9))
@@ -89,15 +87,15 @@
 
 (define (generate-next node tape network)
   (if (member node (final-nodes network))
-      (display tape)
+      (displayln tape)
       (for ((transition (transitions network)))
         (if (equal? node (trans-node transition))
             (for ((newtape (generate-move (trans-label transition) tape)))
-              (generate-next (trans-newnode transition) (append tape (list newtape)) network))
+              (generate-next (trans-newnode transition)
+                             (append tape (list newtape)) network))
             'pass))))
 
 (define (generate network)
   (for ([initialnode (initial-nodes network)])
     (generate-next initialnode null network)))
 
-(trace generate-next)

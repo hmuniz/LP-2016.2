@@ -1,0 +1,148 @@
+#+Title: Aula 28
+#+Date: <2016-10-31 Mon>
+
+Hoje revisamos uma breve explicação sobre os problemas decorrentes de
+usarmos o modelo de estados e atribuição de valores. Revisamos os
+problemas que temos ao permitir que eventualmente uma função que
+altere um estado ou seja influenciada por um estado seja executada de
+forma concorrente. Também falamos sobre /streams/ apresentando o
+código abaixo.
+
+Nos prolongamos sobre a explicação de /macros/ e a diferença entre as
+duas implementações abaixo da função =cons-stream=, explicando porque
+a implementação como função não funciona como o esperado.
+
+#+BEGIN_SRC scheme
+  (define (cons-stream head tail)
+    (cons head (delay tail)))
+
+  (define-syntax cons-stream
+    (syntax-rules ()
+      ((cons-stream head tail)
+       (cons head (delay tail)))))
+#+END_SRC
+
+Para exemplificar macros, também usei como exemplo a macro em CL
+abaixo. Observamos que =while= não poderia ser implementada como
+função
+
+#+BEGIN_SRC lisp
+  (defun while (test body)
+    (if test
+        (progn
+          body
+          (while test body))))
+
+  (defmacro while (test  &body body)
+    `(do ()
+         ((not ,test))
+       ,@body))
+#+END_SRC
+
+Para saber como a macro é expandida, em CL, podemos usar:
+
+#+BEGIN_SRC lisp
+(macroexpand-1 '(while (< x 10) (print x)))
+#+END_SRC
+
+A implementação completa que vimos nas aulas de /streams/ em Racket segue abaixo.
+
+#+BEGIN_SRC scheme
+  #lang racket
+
+  (require math/number-theory)
+
+  (define the-empty-stream '())
+
+  (define (stream-null? stream)
+    (null? stream))
+
+  (define-syntax cons-stream
+    (syntax-rules ()
+      ((cons-stream head tail)
+       (cons head (delay tail)))))
+
+  (define (stream-car stream)
+    (car stream))
+
+  (define (stream-cdr stream)
+    (force (cdr stream)))
+
+  (define (stream-enumerate-interval low high)
+        (if (> low high)
+            the-empty-stream
+            (cons-stream
+              low
+              (stream-enumerate-interval (+ low 1) high))))
+
+  (define (stream-filter pred stream)
+    (cond ((stream-null? stream) the-empty-stream)
+          ((pred (stream-car stream))
+           (cons-stream (stream-car stream)
+                        (stream-filter pred (stream-cdr stream))))
+          (else (stream-filter pred (stream-cdr stream)))))
+
+  (stream-car (stream-cdr (stream-filter prime?
+                                         (stream-enumerate-interval 10000 1000000))))
+#+END_SRC
+
+Os alunos interessados podem comparar o tempo de processamento da
+implementação com /streams/ versus a implementação com listas comuns
+abaixo:
+
+#+BEGIN_SRC scheme
+#lang racket
+
+(require math/number-theory)
+
+(define (sum-primes a b)
+  (define (iter count accum)
+    (cond ((> count b) accum)
+          ((prime? count)
+           (iter (+ count 1) (+ count accum)))
+          (else (iter (+ count 1) accum))))
+(iter a 0))
+
+(define (reverse list)
+  (define (rev-iter list new-list)
+    (if (null? list)
+        new-list
+        (rev-iter (cdr list) (cons (car list) new-list))))
+  (rev-iter list empty))
+
+(define (enumerate-interval l h)
+  (define (enumerate-int-iter l h new-list)
+    (if (> l h)
+        (reverse new-list)
+        (enumerate-int-iter (+ 1 l) h (cons l new-list))))
+  (enumerate-int-iter l h empty))
+
+
+(car (cdr (filter prime? (enumerate-interval 10000 1000000))))
+#+END_SRC
+
+Para o uso do código do livro, podemos ainda usar a /linguagem/ =sicp=
+que foi disponibiliza em Racket, por exemplo:
+
+#+BEGIN_SRC scheme
+  #lang sicp
+
+  (cons-stream 1 2)
+  ...
+#+END_SRC
+
+Ou seja, dá para implementar todo o código acima sem precisar definir
+a macro =cons-stream=. Notem que a sintaxe de macros de CL e Racket é
+bem diferente, comentamos sobre isso.
+
+Para isso será necessário instalar um pacote no DrRacket, menu arquivo
+/Package Manager/ instalar o pacote =sicp=.
+
+
+* Links
+
+- http://stackoverflow.com/questions/13998388/running-code-from-sicp-section-3-5-4-with-drracket
+- https://docs.racket-lang.org/functional-data-structures/streams.html
+- http://stackoverflow.com/questions/24529271/sicp-cons-stream
+
+

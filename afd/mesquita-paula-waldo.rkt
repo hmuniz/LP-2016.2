@@ -1,6 +1,5 @@
 #lang racket
-"Deixamos o english-1 dado em questao, pois usamos oara testar o generate." 
-(require racket/trace)
+
 (define english-1-initial
   '((Initial (1))
     (Final (9))
@@ -21,7 +20,6 @@
     (From 9 to 4 by CNJ)
     (From 9 to 1 by CNJ)))
 
-"A primeira sublista gera e recebe frases afirmativas, a segunda frases interrogativas."
 (define english-1
   '(((Initial (1))
      (Final (9))
@@ -65,11 +63,6 @@
      (From 13 to 14 by |#|))))
 
 
-
-
-; como Racket não possui uma função getf nativa, optamos por escrevê-la em Racket, 
-; ao invés de utilizar alternativas que não têm a mesma clareza e abstração do
-; do código original
 (define (getf lst key (default null))
   (cond ((null? lst) default)
         ((null? (cdr lst)) default)
@@ -94,8 +87,7 @@
 (define (trans-label transition)
   (getf transition 'by))
 
-; adicionamos um termo vazio à nossa lista de abreviações. Para evitar um erro na 
-; recognize-next.
+
 (define abbreviations
   '((NP kim sandy lee)
     (DET a the her)
@@ -109,7 +101,7 @@
     (QW how where who)
     (QM ?)
     (|#|)))
-" Dependendo da estrutura da frase se escolhe ou a sublista de afirmar=tiva ou de pergunta"
+
 (define (recognize network tape)
   (if (member (car tape) (or (assoc 'NP abbreviations) (assoc 'DET abbreviations)))
       (set! network (car network))
@@ -135,23 +127,19 @@
       (if (equal? label '|#|)
           (list tape)
           null)))
-" Criamos primeiramente a funcao generate-initial que funcionou corretamente com a lista
-inicial, porem ao implementarmos emenglish-1 houve um erro de memoria. o generate
-com a tag de question gerou algumas perguntas corretamente, porem o erro aconteceu depois.
-Como a estrutura dos dados sao iguais em english-1-initial e ela funcionou com o codigo de generate
-initial, nao entendemos o porque do erro de memoria"
+
+
 (define (generate-move label tape)
   (cdr (assoc label abbreviations)))
 
 (define (generate-next node tape network)
   (if (member node (final-nodes network))
-      (print tape)
+      (displayln tape)
       (for ((transition (transitions network)))
         (if (equal? node (trans-node transition))
             (for ((newtape (generate-move (trans-label transition) tape)))
               (generate-next (trans-newnode transition) (append tape (list newtape)) network))
             'pass))))
-
 
 (define (generate network tag)
   (begin ((if (equal? tag 'question)
@@ -160,12 +148,7 @@ initial, nao entendemos o porque do erro de memoria"
           (for ((initialnode (initial-nodes network)))
             (generate-next initialnode null network)))))
 
-
 (define (generate-initial network)
   (for ((initialnode (initial-nodes network)))
     (generate-next initialnode null network)))
 
-
-(trace recognize)
-(trace recognize-next)
-(trace recognize-move)
