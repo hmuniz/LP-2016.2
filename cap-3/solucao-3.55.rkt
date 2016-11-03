@@ -27,7 +27,7 @@
     (if (= last 0)
         (cons-stream (car stream) (aux (stream-cdr stream) (stream-car stream)))
         (if (stream-null? stream)
-            0
+            the-empty-stream
             (let ((next (+ (stream-car stream) last)))
             (cons-stream next
                          (aux (stream-cdr stream) next))))))
