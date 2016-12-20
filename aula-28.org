@@ -22,6 +22,8 @@ a implementação como função não funciona como o esperado.
        (cons head (delay tail)))))
 #+END_SRC
 
+#+RESULTS:
+
 Para exemplificar macros, também usei como exemplo a macro em CL
 abaixo. Observamos que =while= não poderia ser implementada como
 função

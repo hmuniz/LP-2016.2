@@ -1,0 +1,16 @@
+#lang racket
+(define (cont-frac n d k) 
+  (define (cont-frac-iter i result) 
+    (if (= i 0) 
+        (/ (n i) (+ (d i) result)) 
+        (cont-frac-iter (- i 1) 
+                        (/ (n i) (+ (d i) result))))) 
+  (cont-frac-iter k 0.0))
+
+(define (euler k) 
+  (+ 2.0 (cont-frac (lambda (i) 1) 
+                    (lambda (i) 
+                      (if (= (remainder i 3) 2) 
+                          (/ (+ i 1) 1.5) 
+                          1)) 
+                    k)))

@@ -1,0 +1,125 @@
+#+Title: Exercício 3.12
+#+Author: Fernanda Scovino
+
+Append forms a new list by successively consing the elements of =x=
+onto =y=. The procedure append! is similar to append, but it is a
+mutator rather than a constructor. It appends the lists by splicing
+them together, modifying the final pair of =x= so that its =cdr= is
+now =y=. (It is an error to call =append!= with an empty =x=.)
+
+Here =last-pair= is a procedure that returns the last pair in its
+argument:
+
+Consider the interaction
+
+#+BEGIN_SRC scheme
+#lang racket
+
+(define (append! x y)
+  (set-cdr! (last-pair x) y)
+  x)
+  
+(define (last-pair x)
+  (if (null? (cdr x))
+      x
+      (last-pair (cdr x))))
+
+(define x (list 'a 'b))
+(define y (list 'c 'd))
+(define z (append x y))
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+> z
+(a b c d)
+> (cdr x)
+<response>
+> (define w (append! x y))
+> w
+(a b c d)
+> (cdr x)
+<response>
+#+END_EXAMPLE
+
+What are the missing =<response>s=? Draw box-and-pointer diagrams to
+explain your answer.
+
+Ao construirmos o diagrama, percebemos que, quando definimos w,
+estamos estamos utilziando uma atribuição de valores, logo, =(append!
+x y)= não irá somente juntar as listas x e y e criar uma variável =w=;
+na verdade, isso vai modificar o valor da variável x, redefinindo seu
+=cdr=, antes =empty=, para ='(c d)=.
+
+Essa parece uma questão simples pensando dessa forma, mas, ao
+executarmos o código, percebemos que essa respostas está errada.
+
+Para executarmos, devemos definir =set-car!= e =set-cdr!= como macros
+e, em seguida rodar o código do problema.
+
+
+#+BEGIN_SRC scheme
+#lang racket
+
+(define-syntax set-car!
+  (syntax-rules ()
+    ((set-car! lst val)
+     (if (not (list? lst))
+         lst
+         (set! lst (cons val (cdr lst)))))))
+
+(define-syntax set-cdr!
+  (syntax-rules ()
+    ((set-cdr! lst val)
+     (set! lst (cons (car lst) val)))))
+
+(define (last-pair x)
+  (if (null? (cdr x))
+      x
+      (last-pair (cdr x))))
+
+(define (append! x y)
+  (set-cdr! (last-pair x) y)
+  x)
+
+(define x (list 'a 'b))
+(define y (list 'c 'd))
+(define z (append x y))
+#+END_SRC
+
+Porém, ao rodar o código, encontramos o seguinte erro:
+
+#+BEGIN_EXAMPLE
+set!: not an identifier in: (last-pair x)
+#+END_EXAMPLE
+
+Depois de pensar e reler um pouco da seção 3.3.1, cheguei à seguinte
+conclusão:
+
+Utilizamos =set!=, =set-car!= e =set-cdr!= para reatribuir valores de
+uma variável.  Logo, como =(last-pair x)= é somente um valor, não
+vinculado à nenhum objeto, essas funções não podem sobreescrevê-lo.
+
+Por exemplo, logo na seção 3.1.1, nossa primeira versão de =withdraw=
+foi:
+
+#+BEGIN_SRC scheme
+
+(define balance 100)
+
+(define (withdraw amount)
+  (if (>= balance amount)
+      (begin (set! balance (- balance amount))
+             balance)
+      "Insufficient funds"))
+#+END_SRC
+
+Nessa versão, criamos um objeto =balance=, que inicialmente possui o
+valor 100 e, ao longo do tempo, esse valor é modificado por
+=set!=. Porém, não faria sentido se, ao invés de definirmos uma
+variável =balance= para ser modificada, usássemos diretamente o
+valor 100.
+
+Esse é o problema que ocorre em =(set-cdr! (last-pair x) y)=, pois
+=(last-pair x)= nada mais é do que um valor, ='(b)=, ao invés de uma
+variável. Tendo isso em mente, a formulação do problema não parece
+muito correta, pois a própria definição do =append!= não é viável.

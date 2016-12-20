@@ -1,0 +1,22 @@
+#lang racket
+
+(define (amr-to-list amr-tree)
+  (define (list-arguments arguments)
+    (let ((first-arg (car arguments))
+          (value-first-arg (cadr arguments))
+          (other-args (cddr arguments)))
+      (if (empty? other-args)
+          (if (not (pair? value-first-arg))
+              (list (list first-arg value-first-arg))
+              (list first-arg (amr-to-list value-first-arg)))
+          (list (list first-arg (amr-to-list value-first-arg)) 
+                (list-arguments other-args)))))
+  (let ((variable (car amr-tree))
+        (instance (caddr amr-tree))
+        (arguments (cdddr amr-tree)))
+    (if (empty? arguments)
+        (list variable instance)
+        (list variable (append (list instance) (list-arguments arguments))))))
+
+(amr-to-list '(w / want-01 :arg0 (b / boy) :arg1 (g / go-01 :arg0 b)))
+(amr-to-list '(w / want-01 :ARG0 (b / boy) :ARG1 (b2 / believe-01 :ARG0 (g / girl) :ARG1 b)))

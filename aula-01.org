@@ -11,8 +11,6 @@ exercícios da seção 1.1.7.
 O conteúdo abaixo é o mesmo do arquivo =aula-01.rkt=.
 
 #+BEGIN_SRC scheme
-  #lang racket
-
   (define (teste-soma-! a b)
     (+ a b))
 
@@ -27,4 +25,10 @@ O conteúdo abaixo é o mesmo do arquivo =aula-01.rkt=.
 
   (define (sum-of-squares x y)
     (+ (square x) (square y)))
+
+  (sum-of-squares 12 4)
 #+END_SRC
+
+#+RESULTS:
+: 160
+

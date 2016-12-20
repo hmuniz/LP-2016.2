@@ -1,0 +1,80 @@
+#+Title: Exercício 1.36
+#+Author: Gustavo Cavaliere
+
+Modify fixed-point so that it prints the sequence of approximations it
+generates, using the newline and display primitives shown in exercise
+1.22. Then find a solution to =xˆx=1000= by finding a fixed point of
+=x -> log(1000)/log(x)=. (Use Scheme’s primitive log procedure, which
+computes natural logarithms.) Compare the number of steps this takes
+with and without average damping. (Note that you cannot start
+fixed-point with a guess of 1, as this would cause division by
+log(1)=0.)
+
+Modificar a funcao "fixed-point" é fácil
+
+#+BEGIN_SRC scheme
+(define tolerance 0.00001)
+
+(define (fixed-point-mod f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (display guess)
+    (newline)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+#+END_SRC
+
+Nao podemos esquecer da funcao "average"
+
+#+BEGIN_SRC scheme
+(define (average x y)
+  (/ ( + x y) 2))
+#+END_SRC
+
+Chamei a funcao objetivo de "exp" e a versao com "average dumping" de
+"exp-dump"
+
+#+BEGIN_SRC scheme
+(define (exp y)
+  (fixed-point-mod (lambda (x) (/ (log y) (log x))) 10))
+
+(define (exp-dump y)
+  (fixed-point-mod
+   (lambda (x) (average x (/ (log y) (log x))))
+   10))
+#+END_SRC
+
+Chamando exp, tive o seguinte resultado
+
+#+BEGIN_EXAMPLE
+(exp 1000)
+
+10
+2.9999999999999996
+6.2877098228681545
+3.7570797902002955
+5.218748919675316
+...
+#+END_EXAMPLE
+
+Já chamando exp-dump:
+
+#+BEGIN_EXAMPLE
+(exp-dump 1000)
+10
+6.5
+5.095215099176933
+4.668760681281611
+4.57585730576714
+4.559030116711325
+4.55613168520593
+4.555637206157649
+4.55555298754564
+4.555538647701617
+4.555536206185039
+#+END_EXAMPLE
+

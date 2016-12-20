@@ -1,0 +1,82 @@
+#+Title: Exercício 2.49
+#+Author: Alifer Sales
+
+Use =segments->painter= to define the following primitive painters:
+
+1. The painter that draws the outline of the designated frame.
+
+2. The painter that draws an ``X'' by connecting opposite corners of
+   the frame.
+
+3.  The painter that draws a diamond shape by connecting the midpoints
+   of the sides of the frame.
+
+* Funções utilizadas
+
+A função =draw-line= não é implementada no livro.
+
+#+BEGIN_SRC scheme
+ (define (segments->painter segment-list)
+  (lambda (frame)
+    (for-each
+     (lambda (segment)
+       (draw-line
+        ((frame-coord-map frame) (start-segment segment))
+        ((frame-coord-map frame) (end-segment segment))))
+     segment-list)))
+     
+ (define (frame-coord-map frame)
+  (lambda (v)
+    (add-vect
+     (origin-frame frame)
+     (add-vect (scale-vect (xcor-vect v)
+                           (edge1-frame frame))
+               (scale-vect (ycor-vect v)
+                           (edge2-frame frame))))))
+#+END_SRC
+
+* Resolução
+
+The painter that draws the outline of the designated frame:
+
+#+BEGIN_SRC scheme
+ (define outline->painter
+  (let ((v0 (make-vector 0 0))
+        (v1 (make-vector 1 0))
+        (v2 (make-vector 0 1))
+        (v3 (make-vector 1 1)))
+    (segments->painter (list (make-segment v0 v1)
+                             (make-segment v0 v2)
+                             (make-segment v1 v3)
+                             (make-segment v2 v3)))))                         
+#+END_SRC
+
+The painter that draws an =X= by connecting opposite corners of the
+frame:
+
+#+BEGIN_SRC scheme
+ (define diagonals->painter
+  (let ((v0 (make-vector 0 0))
+        (v1 (make-vector 1 0))
+        (v2 (make-vector 0 1))
+        (v3 (make-vector 1 1)))
+    (segments->painter (list (make-segment v1 v2)
+                             (make-segment v0 v3)))))                         
+#+END_SRC
+
+The painter that draws a diamond shape by connecting the midpoints of
+the sides of the frame:
+
+#+BEGIN_SRC scheme
+ (define diamond->painter
+  (let ((v1 (make-vector 0.5 0))
+        (v2 (make-vector 1 0.5))
+        (v3 (make-vector 0.5 1))
+        (v4 (make-vector 0 0.5)))
+    (segments->painter (list (make-segment v1 v2)
+                             (make-segment v2 v3)
+                             (make-segment v3 v4)
+                             (make-segment v4 v5)))))                         
+#+END_SRC
+
+

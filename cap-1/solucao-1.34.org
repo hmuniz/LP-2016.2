@@ -1,0 +1,40 @@
+#+Title: Exercício 1.34
+#+Author: Gustavo Cavaliere
+
+Suppose we define the procedure:
+
+#+BEGIN_SRC scheme
+  (define (f g)
+    (g 2))
+#+END_SRC 
+
+Then we have
+
+#+BEGIN_EXAMPLE
+(f square)
+4
+
+(f (lambda (z) ( * z (+ z 1))))
+6
+#+END_EXAMPLE
+
+What happens if we (perversely) ask the interpreter to evaluate the
+combination =(f f)=? Explain.
+
+O que observamos é que incorremos em um erro, pois, ao avaliar a
+expressao o compi- lador executará:
+
+#+BEGIN_SRC scheme
+(f f)
+(f 2)
+(2 2)
+#+END_SRC
+
+Como "2" não é um procedimento, o Dr.Racket retornará o erro:
+
+#+BEGIN_EXAMPLE
+"application: not a procedure;
+ expected a procedure that can be applied to arguments
+  given: 2"
+#+END_EXAMPLE
+

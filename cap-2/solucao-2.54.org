@@ -1,0 +1,29 @@
+#+Title: Exercício 2.54
+
+Esse código possui um erro, ele não passa no primeiro "test case"
+definido abaixo. O script se "confunde" com a hipótese de uma lista
+dentro da outra, retornando falso - sendo que deveria ser true.  Acho
+interessante deixar essa versão aqui com o test case explicitando o
+erro.  Vou fazer uma segunda versão em que o script é aprovado nos
+test cases.  Outro comentário possível de ser feito, é sobre a
+estrutura condicional.
+
+Nesse caso, parece melhor usar o cond que vários ifs
+
+#+BEGIN_SRC scheme
+(define (equal? a b)
+  (if (= (length a) (length b))
+      (if (and (null? a) (null? b))
+          true
+          (if (eq? (car a) (car b))
+              (equal? (cdr a) (cdr b))
+              false))
+      false))
+
+(require rackunit)
+
+(check-equal? (equal? '(1 2 3 (4 5) 6) '(1 2 3 (4 5) 6)) #t)
+(check-false (equal? '(1 2 3 (4 5) 6) '(1 2 3 (4 5 7) 6)))
+(check-true (equal? '(isso é uma lista) '(isso é uma lista)))
+(check-false (equal? '(isso é uma lista) '(isso é uma lista (com outra lista) no meio)))
+#+END_SRC

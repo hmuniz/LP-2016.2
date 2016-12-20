@@ -1,0 +1,53 @@
+#+Title: Exercício 3.17
+#+Author: Gustavo Cavaliere
+
+Devise a correct version of the count-pairs procedure of exercise 3.16
+that returns the number of distinct pairs in any structure.  (Hint:
+Traverse the structure, maintaining an auxiliary data structure that
+is used to keep track of which pairs have already been counted.)
+
+#+BEGIN_SRC scheme
+#lang racket
+
+(define (count-pairs x)
+  (let ((encontrado '()))
+    (define (aux x)
+      (if (or (not(pair? x)) (member x encontrado))
+          0
+          (begin
+            (set! encontrado (cons x encontrado))
+            (+ (aux (car x))
+               (aux (cdr x))
+               1))))
+    (aux x)))
+
+#+END_SRC
+
+Minha ideia foi implementar a variável global "encontrado" para
+guardar os pares já encontrados. Instanciei ele inicialmente como uma
+lista vazia. Desse modo,podemos verificar se o par já foi encontrado
+anteriormente.
+
+A função auxiliar verifica inicialmente se o elemento nao é um par ou
+se o elemento já foi encontrado (usando o member). Em ambos os casos,
+somamos zero ao total.
+
+Caso negativo, transformamos "encontrado" no cons da lista com a
+ variável "encontrado"(usando o set!), indicando que aquela lista já
+ foi computada.  Chamamos a funcao auxiliar para o car e o cdr, pois
+ podemos ter uma lista pares ou mesmo uma lista de listas.
+
+É importante notar que sempre que encontramos um par nao computado,
+retornamos 1. Sempre que nao encontramos um par ou encontramos um par
+já encontrado, retornamos 0. No final, teremos uma soma de uns e
+zeros, cujo total será o número de pares distintos.
+
+Para os testes, usei a bibioteca rackunit.
+
+#+BEGIN_SRC scheme
+(require rackunit)
+
+(check-equal? (count-pairs (list 1 2 3 4 5)) 5)
+(check-equal? (count-pairs (list 'a 'b 'c)) 3)
+(check-equal? (count-pairs (list '(a b) 3)) 4)
+#+END_SRC

@@ -1,0 +1,52 @@
+#+Title: Exercício 2.71
+
+* Enunciado
+
+Suppose we have a Huffman tree for an alphabet of n symbols, and that
+the relative frequencies of the symbols are $1, 2, 4, ..., 2^(n-1)$.
+Sketch the tree for $n=5$; for $n=10$. In such a tree (for general n)
+how many bits are required to encode the most frequent symbol? the
+least frequent symbol?
+
+* Solução
+
+Para um n=5 teremos
+
+#+BEGIN_EXAMPLE
+                     (a b c d e) 31                    
+                    /           \               
+               (a b c d) 15      e 16
+                 /     \
+           (a b c) 7    d 8
+             /    \
+        (a b) 3    c 4
+         /   \
+     a 1      b 2
+#+END_EXAMPLE     
+
+Para n=10 teremos:
+
+#+BEGIN_EXAMPLE
+                                         (a b c d e f g h i j) 1023
+                                           /                       \
+                                     (a b c d e f g h i) 511       j 512
+                                       /                  \
+                               (a b c d e f g h) 255      i 256
+                                   /            \
+                          (a b c d e f g) 127   h 128
+                              /          \
+                     (a b c d e f) 63   g 64
+                          /            \
+                    (a b c d e) 31       f 32
+                      /           \
+                (a b c d) 15      e 16
+                  /     \
+           (a b c) 7    d 8
+             /    \
+        (a b) 3    c 4
+         /   \
+     a 1      b 2
+#+END_EXAMPLE 
+
+O menor número de bites necessários para codificar o símbolo mais
+frequente é $1 (2^0)$ e o para o símbolo menos frequente é $2^n-1$.

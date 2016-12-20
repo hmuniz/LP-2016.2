@@ -1,0 +1,28 @@
+#+Title: Exercício 1.40
+
+* Enunciado
+
+Deﬁne a procedure cubic that can be used together with the
+=newtons-method= procedure in expressions of the form
+
+#+BEGIN_SRC scheme
+(newtons-method (cubic a b c) 1)
+#+END_SRC
+
+to approximate zeros of the cubic x^3 +ax^2 +bx +c.
+
+* Solução
+
+#+BEGIN_SRC scheme
+(define (cube x)
+  (* x x x))
+
+(define (square x)
+  (* x x))
+
+(define (cubic a b c)
+  (lambda (x) ((+ (cube x)
+                  (* a (square x))
+                  (* b x)
+                  c))))
+#+END_SRC

@@ -1,0 +1,235 @@
+#+Title: Prova A2
+
+Sites permitidos:
+
+- https://mitpress.mit.edu/sicp/full-text/book/book.html
+- https://docs.racket-lang.org
+- https://github.com/arademaker/LP-2016.2
+- http://eclass.fgv.br 
+
+*Atenção*, instruções específicas:
+
+- O último site é para envio dos arquivos. 
+- A submissão deve ser feita com um arquivo .rkt por exercício. Sendo
+  os nomes =ex-P-X.rkt= onde =P= é a parte e =X= é o número.
+- Parte 1 é toda *obrigatória* e a parte 2 o aluno deve escolher uma
+  das opções para resolver.
+
+* Parte 1
+
+** Exercício 1
+
+Escreva a função =union= que perserva a ordem dos elementos ao unir
+duas listas tradas como conjuntos.
+
+#+BEGIN_EXAMPLE
+> (new-union '(a b c) '(b a d))
+(a b c d)
+#+END_EXAMPLE
+
+Submeter o arquivo =ex-1-1.rkt=.
+
+** Exercício 2
+
+Defina uma função que receba uma lista como entrada e retorne uma
+lista indicando a quantidade de ocorrências de cada elemento na lista
+original. Sua função deve receber como argumento a função que será
+usada para comparar quando dois elementos são iguais:
+
+#+BEGIN_EXAMPLE
+> (occurrences '(a b a d a c d c a) equal?)
+((a . 4) (c . 2) (d . 2) (b . 1))
+#+END_EXAMPLE
+
+Submeter no arquivo =ex-1-2.rkt=.
+
+** Exercício 3
+
+Imagine a função =pos+= que recebe uma lista e retorna uma lista com
+cada elemento somado a sua posição:
+
+#+BEGIN_EXAMPLE
+> (pos+ '(7 5 1 4))
+(7 6 3 7)
+#+END_EXAMPLE
+
+Defina a função =pos+= de 3 formas: (1) /recursiva/ implementando um
+processo /recurso/; (2) /recursiva implementando um processo
+/interativo/; e (3) usando a função /map/.
+
+Submeter no arquivo =ex-1-3.rkt=.
+
+** Exercício 4
+
+Modifique a função =most=, apresentada abaixo em Common Lisp, para que
+ela retorne os dois elementos com maior pontuação (score) de uma
+lista. A pontuação de cada elemento é defina pela função passada como
+primeiro argumento.
+
+#+BEGIN_SRC lisp
+  (defun most (fn lst)
+    (if (null lst)
+	(values nil nil)
+	(let* ((wins (car lst))
+	       (max  (funcall fn wins)))
+	  (dolist (obj (cdr lst))
+	    (let ((score (funcall fn obj)))
+	      (when (> score max)
+		(setf wins obj
+		      max score))))
+	  (values wins max))))
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+> (most #'length '((a b) (a b c) (a)))
+(a b c)
+3
+#+END_EXAMPLE
+
+Submeter no arquivo =ex-1-4.rkt=.
+
+** Exercício 5
+
+Defina a função =max-so-far= que receba um argumento, um número, e
+retorne sempre o maior valor que foi passado para ela desde sua
+definição. Isto é, ela deve memorizar o maior valor passado para ela e
+sempre retornar este valor ou atualiza-lo se o novo valor passado for
+maior.
+
+#+BEGIN_EXAMPLE
+> (max-so-far 1)
+1
+> (max-so-far 10)
+10
+> (max-so-far 8)
+10
+> (max-so-far 12)
+12
+#+END_EXAMPLE
+
+Submeter no arquivo =ex-1-5.rkt=.
+
+* Parte 2
+
+Escolha uma das opções para resolver.
+
+** Opção 1 - Busca em Largura
+
+Em nosso curso, vimos a implementação de um reconhecedor e gerador
+baseado em AFD. Cada grupo apresentou o código e a implementação
+completa em Common Lisp está na [[https://github.com/arademaker/LP-2016.2/blob/master/aula-26.org][aula 26]]. Nesta versão, a navegação
+pelos estados do AFD é feita em profundidade, isto é, cada novo estado
+X alcançado, define-se um dos seus estados sucessores e ele é
+visitado, antes mesmo de todos os outros estados vizinhos ao estado X
+serem visitados.
+
+[[file:afd.jpg]]
+
+Vamos adaptar a função =generate= para fazer uma busca em largura ao
+invés de uma busca em profundidade. Na busca em largura, cada estado é
+tratado por vez e todos os etados alcançados a partir deste são
+tratados em seguida. Apenas depois que todos estes novos estados serem
+considerados, então os estados seguintes a estes são tratados. Para
+esta versão, vamos precisar representar explicitamente os estados como
+uma estrutura de dados:
+
+#+BEGIN_EXAMPLE
+(node tape)
+#+END_EXAMPLE
+
+As funções mais gerais poderão ficar como:
+
+#+BEGIN_SRC lisp
+  (defun generate (network)
+    (let ((agenda (generate-initial-states network)))
+      (do ()
+	  ((null agenda)) ; do until agenda empty
+	(setq agenda (generate-next-states-list agenda network)))))
+
+  (defun generate-next-states-list (agenda network)
+    (if (null agenda)
+	'()
+	(append (generate-next-states (car agenda) network)
+		(generate-next-states-list (cdr agenda) network))))
+#+END_SRC
+
+Submeter no arquivo =ex-2-1.rkt=.
+
+** Opção 2 - Longest Path
+
+Abaixo temos o programa que acha o menor caminho entre dois nós em um
+grafo. A função =shortest-path= escrita em Common Lisp recebe um nó
+como entrada, um destino e a rede, e retorna o menor caminho, se ele
+existe, entre os dois pontos. Nós são representados como símbolos e a
+rede é representada por listas com elementos da forma:
+
+#+BEGIN_EXAMPLE
+(node . vizinhos)
+#+END_EXAMPLE
+
+Ou seja, a rede da figura abaixo é representada por:
+
+#+BEGIN_EXAMPLE
+(setf min '((a b c) (b c) (c d)))
+#+END_EXAMPLE
+
+[[file:graph.jpg]]
+
+#+BEGIN_SRC lisp
+  (defun shortest-path (start end net)
+    (bfs end (list (list start)) net))
+
+  (defun bfs (end queue net)
+    (if (null queue)
+	nil
+	(let ((path (car queue)))
+	  (let ((node (car path)))
+	    (if (eql node end)
+		(reverse path)
+		(bfs end
+		     (append (cdr queue)
+			     (new-paths path node net))
+		     net))))))
+
+  (defun new-paths (path node net)
+    (mapcar (lambda (n) (cons n path))
+	    (cdr (assoc node net))))
+
+#+END_SRC
+
+Note-se que para saber os nós que podemos alcançar a partir do nó =a=
+usamos:
+
+#+BEGIN_EXAMPLE
+> (cdr (assoc 'a min))
+(B C)
+#+END_EXAMPLE
+
+E a função principal se aplicada no grafo da figura retorna:
+
+#+BEGIN_EXAMPLE
+> (shortest-path 'a 'd min)
+(A C D)
+#+END_EXAMPLE
+
+Note-se também como a /fila/ é usada, novos nós atingidos sempre são
+colocados no final da fila, permitindo que a rede seja percorida um
+nível por vez.
+
+Sua tarefa é escrever a função =longest-path= que ache o mais longo
+caminho /finito/ em uma rede, note que a rede pode conter ciclos. Por
+isso desejamos o mais longo caminho sem repetições de nós.
+
+Desejamos a função tal que:
+
+#+BEGIN_EXAMPLE
+> (longest-path 'a 'd min)
+(A B C D)
+#+END_EXAMPLE
+
+Submeter no arquivo =ex-2-2.rkt=.
+
+** Opção 3 - Dilema do Prisioneiro
+
+Vide arquivo [[file:ps4prs.org]]. Submeter respostas no arquivo
+=ex-2-3.rkt=, neste caso apenas o problema 5 é opcional.

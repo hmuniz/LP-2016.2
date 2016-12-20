@@ -1,0 +1,34 @@
+#+Title: Exercício 2.44
+#+Author: Alifer Sales
+
+Define the procedure up-split used by corner-split. It is similar to
+right-split, except that it switches the roles of below and beside.
+
+O exercício abaixo faz parte da seção [[https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-15.html#%_sec_2.2.4][A Picture Language]] e, nessa
+seção, o livro assume, a principio, algumas funções primitivas que
+agem sobre imagens. Entre elas, os combinadores de imagens =below= e
+=beside=.
+
+A função =below= recebe duas imagens como argumentos. A partir disso,
+ela forma uma terceira imagem, onde o lado esquerdo é a primeira
+imagem passada e o lado direito a segunda.
+
+Já a função =beside=, que também recebe duas imagens como argumento,
+devolve uma terceira imagem, onde a parte inferior é a primeira imagem
+passada e a parte superior é a segunda.
+
+Como esperado ao longo da seção, essas funções são usadas para a
+criações de outras funções, em camadas de abstrações posteriores, que
+irão complementar o pacote de em formação.
+
+A partir disso, a resolução:
+
+#+BEGIN_SRC scheme
+  #lang racket
+
+  (define (up-split painter n)
+    (if (= n 0)
+	painter
+	(let ((smaller (up-split painter (- n 1))))
+          (below painter (beside smaller smaller)))))
+#+END_SRC

@@ -1,0 +1,336 @@
+#+Title: The Prisoner's Dilemma: A Fable
+
+(versão original no [[file:ps4prs.pdf]] e código no [[file:ps4prs.rkt]])
+
+In the mid-1920's, the Nebraska State Police achieved what may still
+be their finest moment. After a 400-mile car chase over dirt roads and
+corn fields, they finally caught up with the notorious bank robbers
+Bonnie and Clyde. The two criminals were brought back to the police
+station in Omaha for further interrogation.
+
+Bonnie and Clyde were questioned in separate rooms, and each was
+offered the same deal by the police. The deal went as follows (since
+both are the same, we need only describe the version presented to
+Bonnie):
+
+``Bonnie, here's the offer that we are making to both you and Clyde.
+If you both hold out on us, and don't confess to bank robbery, then we
+admit that we don't have enough proof to convict you. However, we
+/will/ be be able to jail you both for one year, for reckless driving
+and endangerment of corn. If you turn state's witness and help us
+convict Clyde (assuming he doesn't confess), then you will go free,
+and Clyde will get twenty years in prison. On the other hand, if you
+don't confess and Clyde does, then /he/ will go free and /you/ will
+get twenty years.''
+
+- "What happens if both Clyde and I confess?" asked Bonnie.
+
+- "Then you both get ten years," said the interrogator.
+
+Bonnie, who had been a math major at Cal Tech before turning to crime,
+reasoned this way: "Suppose Clyde intends to confess.  Then if I
+don't confess, I'll get twenty years, but if I do confess, I'll only
+get ten years. On the other hand, suppose Clyde intends to hold out on
+the cops. Then if I don't confess, I'll go to jail for a year, but if
+I do confess, I'll go free.  So no matter what Clyde intends to do, I
+am better off confessing than holding out. So I'd better confess."
+
+
+Naturally, Clyde employed the very same reasoning. Both criminals
+confessed, and both went to jail for ten years. The police, of course,
+were triumphant, since the criminals would have been free in a year
+had both remained silent.
+
+* The Prisoner's Dilemma
+
+The Bonnie and Clyde story is an example of a situation known in
+mathematical game theory as the prisoner's dilemma. A prisoner's
+dilemma always involves two game players, and each has a choice
+between cooperating and defecting. If the two players cooperate, they
+each do moderately well; if they both defect, they each do moderately
+poorly. If one player cooperates and the other defects, then the
+defector does extremely well and the cooperator does extremely
+poorly. (In the case of the Bonnie and Clyde story, cooperating means
+cooperating with one's partner --- i.e., holding out on the police ---
+and defecting means confessing to bank robbery.) Before formalizing
+the prisoner's dilemma situation, we need to introduce some basic game
+theory notation.
+
+** A Crash Course in Game Theory
+
+In game theory, a /two-person binary-choice game/ is represented as a
+two-by-two matrix. Figure 1 shows a hypothetical game matrix.  The two
+players in this case are called *A* and *B*, and the choices are
+called /cooperate/ and /defect/.
+
+#+name: table-1
+|              | B cooperates        | B defects           |
+|--------------+---------------------+---------------------|
+| A cooperates | A gets 5 / B gets 5 | A gets 2 / B gets 3 |
+| A defect     | A gets 3 / B gets 2 | A gets 1 / B gest 1 |
+
+
+Above a hypothetical game matrix.
+
+Players A and B can play a single game by separately (and secretly)
+choosing to either cooperate or defect. Once each player has made a
+choice, he announces it to the other player; and the two then look up
+their respective scores in the game matrix.  Each entry in the matrix
+is a pair of numbers indicating a score for each player, depending on
+their choices. Thus, in the matrix above, if Player A chooses to
+cooperate while Player B defects, then A gets 2 points and B gets 3
+points. If both players defect, they each get 1 point. Note, by the
+way, that the game matrix is a matter of public knowledge; for
+instance, Player A knows before the game even starts that if he and B
+both choose to defect, they will each get 1 point.
+
+In an /iterated game/, the two players play repeatedly: thus, after
+finishing one game, A and B may play another. (Admittedly, there is a
+little confusion in the terminology here: you can think of each
+individual game as a single 'round' of the larger, iterated game.)
+There are a number of ways in which iterated games may be played; in
+the simplest situation, A and B play for some fixed number of rounds
+(say, 200), and before each round they are able to look at the record
+of all previous rounds. For instance, before playing the tenth round
+of their iterated game, both A and B are able to study the results of
+the previous nine rounds.
+
+** An Analysis of a Simple Game Matrix
+
+The game depicted in Figure 1 is a particularly easy one to analyze.
+Let's examine the situation from Player A's point of view (Player B's
+point of view is identical):
+
+``Suppose B cooperates. Then I do better by cooperating myself (I
+receive five points instead of three). On the other hand, suppose B
+defects. I still do better by cooperating (since I get two points
+instead of one). So no matter what B does, I am better off
+cooperating.''
+
+Player B will, of course, reason the same way, and both will choose to
+cooperate. In the terminology of game theory, both A and B have a
+/dominant/ choice --- i.e., a choice that gives a preferred outcome no
+matter what the other player chooses to do. Table 1, by the way,
+does /not/ represent a prisoner's dilemma situation, since when
+both players make their dominant choice, they also both achieve their
+highest personal scores.  We'll see an example of a prisoner's dilemma
+game very shortly.
+
+To recap: in any particular game using the matrix above, we would
+expect both players to cooperate; and in an iterated game, we would
+expect both players to cooperate repeatedly, on every round.
+
+** The Prisoner's Dilemma Game Matrix
+
+Now consider the game matrix shown below:
+
+#+name: table-2
+|              | B cooperates | B defects |
+| A cooperates | A:3 B:3      | A:0 B:5   |
+| A defects    | A:5 B:0      | A:1 B:1   |
+
+
+In this case, Players A and B both have a dominant choice -- namely,
+defection. No matter what Player B does, Player A improves his own
+score by defecting, and vice versa.
+
+However, there is something odd about this game. It seems as though
+the two players would benefit by choosing to cooperate. Instead of
+winning only one point each, they could win three points each.  So the
+'rational' choice of mutual defection has a puzzling self-destructive
+flavor.
+
+The matrix of table-2 is an example of a prisoner's dilemma game
+situation. Just to formalize the situation, let =CC= be the number of
+points won by each player when they both cooperate; let =DD= be the
+number of points won when both defect; let =CD= be the number of
+points won by the cooperating party when the other defects; and let
+=DC= be the number of points won by the defecting party when the
+other cooperates. Then the prisoner's dilemma situation is
+characterized by the following conditions:
+
+#+BEGIN_EXAMPLE
+DC > CC > DD > CD 
+CC > (DC + CD) / 2
+#+END_EXAMPLE
+
+In the game matrix of table-2, we have:
+
+#+BEGIN_EXAMPLE
+DC = 5 
+CC = 3 
+DD = 1 
+CD = 0
+#+END_EXAMPLE
+
+so both conditions are met. In the Bonnie and Clyde story, by the way,
+you can verify that:
+
+#+BEGIN_EXAMPLE
+DC =   0
+CC =  -1 
+DD = -10 
+CD = -20
+#+END_EXAMPLE
+
+Again, these values satisfy the prisoner's dilemma conditions.
+
+* Axelrod's Tournament
+
+In the late 1970's, political scientist Robert Axelrod held a computer
+tournament designed to investigate the prisoner's dilemma
+situation. Contestants in the tournament submitted computer programs
+that would compete in an iterated prisoner's dilemma game of
+approximately two hundred rounds, using the same matrix shown in
+table-2. Each contestant's program played five iterated games against
+each of the other programs submitted, and after all games had been
+played the scores were tallied.
+
+The contestants in Axelrod's tournament included professors of
+political science, mathematics, psychology, computer science, and
+economics. The winning program --- the program with the highest
+average score --- was submitted by Anatol Rapoport, a professor of
+psychology at the University of Toronto. In this problem set, we will
+pursue Axelrod's investigations and make up our own Racket programs to
+play the iterated prisoner's dilemma game.
+
+Before we look at the two-player program, it is worth speculating on
+what possible strategies might be employed in the iterated prisoner's
+dilemma game. Here are some examples:
+
+- All-Defect :: A program using the *all-defect* strategy simply
+     defects on every round of every game.
+
+- Poor-Trusting-Fool ::  A program using the *poor-trusting-fool* 
+     strategy cooperates on every round of every game.
+
+- Random :: This program cooperates or defects on a random basis.
+
+- Go-by-Majority ::  This program cooperates on the first round. On
+     all subsequent rounds, *go-by-majority* examines the history of
+     the other player's actions, counting the total number of
+     defections and cooperations by the other player. If the other
+     player's defections outnumber her cooperations, *go-by-majority*
+     will defect; otherwise this strategy will cooperate.
+
+- Tit-for-Tat :: This program cooperates on the first round, and then
+     on every subsequent round it mimics the other player's previous
+     move. Thus, if the other player cooperates (defects) on the $n$th
+     round, then *tit-for-tat* will cooperate (defect) on the
+     $(n + 1)$th round.
+
+All of these strategies are extremely simple. (Indeed, the first three
+do not even pay any attention to the other player; their responses are
+uninfluenced by the previous rounds of the game.)  Nevertheless,
+simplicity is not necessarily a disadvantage.  Rapoport's first-prize
+program employed the *tit-for-tat* strategy, and achieved the highest
+average score in a field of far more complicated programs.
+
+* The Two-Player Prisoner's Dilemma Program
+
+A Racket program for an iterated prisoner's dilemma game is in the
+file ps4prs.rkt. The procedure =play-loop= pits two players (or, to be
+more precise, two 'strategies') against one another for approximately
+100 games, then prints out the scores for each of the two players.
+
+Player strategies are represented as procedures. Each strategy takes
+two inputs --- its own 'history' (that is, a list of all of its
+previous ``plays'') and its opponent's history. The strategy returns
+either the symbol =c= (for cooperate) or the symbol =d= (for defect).
+
+At the beginning of an iterated game, each history is an empty list.
+As the game progresses, the histories grow (via =extend-history=) into
+lists of =c='s and =d='s. Note how each strategy must have its /own/
+history as its first input. So in =play-loop-iter=, =strat0= has
+=history0= as its first input, and =strat1= has =history1= as its
+first input.
+
+The values from the game matrix are stored in a list named
+*game-association*. This list is used to calculate the scores at the
+end of the iterated game.
+
+Some sample strategies are given at the end of the program.
+=All-defect= and =poor-trusting-fool= are particularly simple; each
+returns a constant value regardless of the histories. The
+=random-strategy= also ignores the histories and chooses randomly
+between cooperation and defection. You should study =go-by-majority=
+and =tit-for-tat= to see that their behavior is consistent with the
+descriptions in the previous section.
+
+* Problems
+
+** Problem 0 (no write-up necessary)
+
+Use =play-loop= to play games among the five defined strategies.
+Notice how a strategy's performance varies sharply depending on its
+opponent.  For example, =poor-trusting-fool= does quite well against
+=tit-for-tat= or against another =poor-trusting-fool=, but it loses
+badly to =all-defect=.  Pay special attention to =tit-for-tat=. Notice
+how it never beats its opponent --- but it never loses badly.
+
+** Problem 1
+
+1. Games involving =go-by-majority= tend to be slower than other
+   games. Why is that so? Use order-of-growth notation to explain your
+   answer.
+
+2. Alyssa P. Hacker, upon seeing the code for =go-by-majority=,
+   suggested the following iterative version of the procedure:
+
+#+BEGIN_SRC scheme
+(define (go-by-majority my-history other-history)
+  (define (majority-loop cs ds hist)
+    (cond ((empty-history? hist) (if (> ds cs) 'd 'c))
+          ((eq? (most-recent-play hist) 'c)
+           (majority-loop (1+ cs) ds (rest-of-plays hist)))
+          (else
+           (majority-loop cs (1+ ds) (rest-of-plays hist)))))
+  (majority-loop 0 0 other-history))
+#+END_SRC
+
+Compare this procedure with the original version. Do the orders of
+growth (in time) for the two procedures differ? Is the newer version
+faster?
+
+** Problem 2
+
+Write a new strategy =tit-for-two-tats=. The strategy should always
+cooperate unless the opponent defected on both of the previous two
+rounds. (Looked at another way: =tit-for-two-tats= should cooperate if
+the opponent cooperated on either of the previous two rounds.) Play
+=tit-for-two-tats= against other strategies.
+
+** Problem 3
+
+Write a procedure =make-tit-for-n-tats=. This procedure should take a
+number as input and return the appropriate =tit-for-tat=-like
+strategy.  For example, =(make-tit-for-n-tats 2)= should return a
+strategy equivalent to =tit-for-two-tats=.
+
+** Problem 4
+
+1. Write a procedure =make-dual-strategy= which takes as input two
+   strategies (say, =strat0= and =strat1=) and an integer (say, =
+   switch-point=). The =make-dual-strategy= should return a strategy
+   which plays =strat0= for the first =switch-point= rounds in the
+   iterated game, then switches to =strat1= for the remaining rounds.
+
+2. Use =make-dual-strategy= to define a procedure
+   =make-triple-strategy= which takes as input three strategies and
+   two switch points.
+
+** Problem 5
+
+Write a procedure =niceify=, which takes as input a strategy (say,
+=strat=) and a number between 0 and 1 (call it =niceness-factor=). The
+=niceify= procedure should return a strategy that plays the same as =
+strat= except: when =strat= defects, the new strategy should have a =
+niceness-factor= chance of cooperating.  (If =niceness-factor= is 0,
+the returned strategy is exactly the same as =strat=; if
+=niceness-factor= is 1, the returned strategy is the same as
+=poor-trusting-fool=.)
+
+Use =niceify= with a low value for =niceness-factor= -- say, 0.1 -- to
+create two new strategies: =slightly-nice-all-defect= and =
+slightly-nice-tit-for-tat=.
+

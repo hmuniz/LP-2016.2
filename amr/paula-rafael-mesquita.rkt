@@ -1,0 +1,60 @@
+#lang racket
+
+;;; EXERCÍCIO 2 DE 3 (AMR NOTATION_FIRST REPRESENTATION) ;;;
+
+(define (first-representation sentence)
+  (begin (define (aux-1 sentence)
+           (if (pair? sentence)
+               (cons (car sentence)
+                     (cons (if (eq? (length sentence) 3)
+                               (caddr sentence)
+                               (cons (caddr sentence)
+                                     (let ((size (length (cdddr sentence))))
+                                       (define (aux-2 sub-sentence size)
+                                         (if (eq? size 0)
+                                             empty
+                                             (cons (cons (car sub-sentence) (cons (aux-1 (cadr sub-sentence)) empty))
+                                                   (aux-2 (cddr sub-sentence) (- size 2)))))
+                                       (aux-2 (cdddr sentence) size))))
+                           empty))
+               sentence))
+         (aux-1 sentence)))
+
+;;; EXERCÍCIO 3 DE 3 (AMR NOTATION_SECOND REPRESENTATION) ;;;
+
+(define (second-representation lst)
+  (define (conv-instance-of lst out)
+    (define (convfilter lst out)
+      (if (null? lst)
+          out
+          (begin (set! out (append out (list (append '(Instance of)
+                                                     (list (list-ref (car lst) 0))
+                                                     (list (list-ref (car lst) 2))))))
+                 (convfilter (cdr lst) out))))
+    (begin (set! out (append out (list (append '(Instance of)
+                                               (list (list-ref lst 0))
+                                               (list (list-ref lst 2))))))
+           (convfilter (filter (lambda(x) (list? x)) lst) out))) 
+  (define (convargs lst out)
+    (define (auxconv lst out counter)
+      (if (eq? counter 0)
+          (auxconvfilter (filter (lambda(x) (list? x)) lst) out)
+          (if (list? (list-ref lst (- counter 1)))
+              (begin (set! out (append out (list (append (list (list-ref lst (- counter 2))
+                                                               (car lst)
+                                                               (car (list-ref lst (- counter 1))))))))
+                     (auxconv lst out (- counter 1)))
+              (auxconv lst out (- counter 1)))))
+    (define (auxconvfilter lst out)
+      (if (null? lst)
+          out
+          (if (eq? (length (car lst)) 3)
+              (begin out
+                     (auxconvfilter (cdr lst) out))
+              (begin (set! out (append out (list (append (list (list-ref (car lst) 3)
+                                                               (caar lst)
+                                                               (list-ref (car lst) 4))))))
+                     (auxconvfilter (cdr lst) out)))))
+    (auxconv lst out (length lst)))
+  (append (conv-instance-of lst '())
+          (convargs lst '())))

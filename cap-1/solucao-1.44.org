@@ -1,0 +1,36 @@
+#+Title: Exercício 1.44
+
+* Enunciado
+
+ The idea of smoothing a function is an important concept in signal processing. If f is a function
+ and dx is some small number,then the smoothed version of f is the function whose value at a point
+ x is the average of f (x− dx), f (x),and f (x+dx). Write a  procedure =smooth= that takes as input
+ a procedure that computes f and returns a procedure that computes the smoothed f. It is sometimes
+ valuable to repeatedly smooth a function (that is, smooth the smoothed function, and soon) to obtain 
+ the n-folds moothed function. Show how to generate the n-fold smoothed function of any given function
+ using =smooth= and =repeated= from Exercise 1.43.
+
+* Solução
+
+#+BEGIN_SRC scheme
+(define (compose f g)
+  (lambda (x) (f (g x))))
+
+(define (repeated f n)
+  (cond ((< n 0) (error "'n' can't be a negative number"))
+        ((= n 0) null)
+        ((= n 1) f)
+        (else (compose f (repeated f (- n 1))))))
+
+(define (smooth f dx)
+  (lambda (x) (/ (+ (f (- x dx))
+                    (f x)
+                    (f (+ x dx)))
+                 3)))
+
+(define (n-fold-smoothed f dx n)
+  (repeated (smooth f dx) n))
+
+#+END_SRC
+
+

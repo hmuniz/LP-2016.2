@@ -1,0 +1,28 @@
+#+Title: 
+#+Date: 2016-11-24
+#+Author: Yuri e Rafael Figueiredo
+
+Código para identificar se existe strings iguais em duas listas.
+
+#+BEGIN_SRC scheme
+
+(define (identical-phrase lista1 lista2)
+(define (aux list1 list2 [resultado empty])
+  (cond ((null? list1) (reverse resultado))
+        ((string=? (car list1) (car list2))
+         (aux (cdr list1) lista2 (cons  (car list1) resultado)))
+        ((null? (cdr list2)) (aux (cdr list1) lista2 resultado))
+        (else (aux list1 (cdr list2) resultado))))
+  (aux lista1 lista2))
+
+#+END_SRC
+
+
+Testes :
+
+#+BEGIN_SRC scheme
+
+(identical-phrase (list "Grêmio joga melhor que o Atlético-MG, mata o jogo aos 45 e leva boa vantagem para o Sul" "2" "3" "1") (list "Grêmio joga melhor que o Atlético-MG, mata o jogo aos 45 e leva boa vantagem para o Sul" "galo bi de nada" "teste" "1" "2"))
+'("Grêmio joga melhor que o Atlético-MG, mata o jogo aos 45 e leva boa vantagem para o Sul" "2" "1")
+
+#+END_SRC

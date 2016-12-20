@@ -1,0 +1,72 @@
+#+Title: Solução do exercício 3.64
+
+* Enunciado
+
+Write a procedure =stream-limit= that takes as arguments a stream and
+a number (the tolerance). It should examine the stream until it finds
+two successive elements that differ in absolute value by less than the
+tolerance, and return the second of the two elements.  Using this, we
+could compute square roots up to a given tolerance by
+
+#+BEGIN_SRC scheme
+(define (sqrt x tolerance)
+  (stream-limit (sqrt-stream x) tolerance))
+#+END_SRC
+
+* A solução
+
+De acordo com o enunciado, =stream-limit= recebe dois argumentos, uma
+stream e um valor de tolerância. Outra restrição importante é que a
+diferença a ser verificada deve ser em valor /absoluto/, o que até
+ajuda na escrita do código, já que não vou ter que me preocupar com a
+ordem dos argumentos do procedimento primitivo =-=.
+
+O procedimento é bem /straight-forward/, se a diferença entre o
+primeiro e o segundo elemento for menor que a tolerância, devolver o
+segundo elemento. Caso contrário, consumir o primeiro elemento e
+chamar stream-limit novamente com o resto:
+
+#+BEGIN_SRC scheme
+  (define (stream-limit stream tolerance)
+    (if (< (abs (- (stream-first (stream-last stream))
+                   (stream-first stream) tolerance))) 
+        (stream-first (stream-last stream))
+        (stream-limit (stream-last stream) tolerance)))
+#+END_SRC
+
+Outra opção é utilizar o procedimento apresentado no SICP,
+=stream-ref=, para selecionar os elementos. Depois que eu fiz, percebi
+que não tem tanta utilidade neste caso específico. O código acima
+somente utiliza car e cadr, afinal.
+
+#+BEGIN_SRC scheme
+(define (stream-limit stream tolerance)
+        (if (< (abs (- (stream-ref stream 1) (stream-ref stream 0))) tolerance)
+                (stream-ref stream 1)
+                (stream-limit (stream-last stream) tolerance)))
+#+END_SRC
+
+* Testes
+
+Utilizei o pacote rackunit para fazer o teste:
+
+#+BEGIN_SRC 
+(require rackunit)
+
+(define testing-stream (stream-cons 1 8 9 3 8 10 114 87 3 12))
+
+(check-equal? (stream-limit testing-stream 5) 9)
+#+END_SRC
+
+A grande contribuição do rackunit (além de poupar algumas linhas de
+código) é que as mensagens de erro são bastante informativas por
+default. No entanto, embora o código seja bastante simples, o que gera
+pouca margem para erro, percebam que o teste se limita a conferir o
+output.
+
+Alguém tem ideia de como fazer testes mais inteligentes, além do
+"feijão com arroz"? Até pensei em usar um "check-length" (ver
+documentação do rackunit), mas não teria a menor necessidade (por
+definição, se o output é o esperado, não é possível que tenha um
+length maior que 1).
+ 

@@ -35,3 +35,5 @@ Leituras recomendadas:
 - http://racket-lang.org
 - https://emacsformacosx.com
 - https://learnxinyminutes.com/docs/racket/
+
+

@@ -1,0 +1,94 @@
+#+Title: Aula 31
+#+Date: <2016-11-07 Mon>
+
+Continuamos a ver o exemplo de como lidar com arquivos CONLL em
+Lisp. Hoje partimos de onde tínhamos parado na última aula:
+
+#+BEGIN_SRC lisp
+(defclass sentence ()
+  ((start  :initarg :start
+	   :initform 0
+	   :accessor sentence-start)
+   (tokens :initarg :tokens
+	   :initform nil
+	   :accessor sentence-tokens)))
+
+(defun read-file (filename)
+  (with-open-file (in filename)
+    (do ((line (read-line in nil nil)
+	       (read-line in nil nil))
+	 (lineno 0
+		 (+ 1 lineno))
+	 (current (make-instance 'sentence))
+	 (groups nil))
+	((null line)
+	 (progn (push current groups)
+		(reverse groups)))
+      (if (equal line "")
+	  (progn (push current groups)
+		 (setf current (make-instance 'sentence))
+		 (setf (sentence-start current) (+ 1 lineno)))
+	  (push line (sentence-tokens current))))))
+#+END_SRC
+
+Conversamos sobre os dois problemas com este código. O primeiro é que
+se interpretarmos o formato [[http://universaldependencies.org/format.html][CoNLL-U]] de forma mais abrangente, queremos
+que qualquer sequência de uma ou mais linhas em branco delimite
+sentenças e sentenças são sequências de linhas não brancas. Outro
+problema com o código acima é que os objetos sentenças criados,
+instâncias da class =sentence=, tem as linhas dos tokens invertidas na
+resposta.
+
+Para resolver este problema, evoluimos para o código que usa a idéia
+de autômatos como "máquinas de estado":
+
+#+BEGIN_SRC lisp
+(defun read-file (filename)
+  (with-open-file (in filename)
+    (do ((line (read-line in nil nil)
+	       (read-line in nil nil))
+	 (lineno 0
+		 (+ 1 lineno))
+	 (state 1)
+	 (tokens nil)
+	 (begining 0)
+	 (sentences nil))
+	((null line)
+	 (push (reverse tokens) sentences)
+	 (reverse sentences))
+      (cond
+	((and (equal state 1) (equal line ""))
+	 nil)
+	((and (equal state 1) (not (equal line "")))
+	 (setf state 2
+	       begining lineno)
+	 (push line tokens))
+	((and (equal state 2) (not (equal line "")))
+	 (push line tokens))
+	((and (equal state 2) (equal line ""))
+	 (push (make-instance 'sentence :start begining :tokens (reverse tokens))
+	       sentences)
+	 (setf state 1
+	       tokens nil))))))
+#+END_SRC
+
+Quais os problemas pendentes nesta versão? Como será o output se
+tentarmos ler um arquivo com:
+
+#+BEGIN_EXAMPLE
+
+
+# key value
+alifer
+pedro
+
+
+
+# key1 valor1 key2 valor2
+alexandre
+gustavo
+
+
+#+END_EXAMPLE
+
+Como fazer estas mesmas coisas em Racket? 

@@ -1,0 +1,47 @@
+#+Title: Exercício 1.29
+
+* Enunciado
+
+Simpson's Rule is a more accurate method of numerical integration than
+the method illustrated above. Using Simpson's Rule, the integral of a
+function f between a and b is approximated as
+
+$(H/3)[Yo+4Y1+2Y2+...+2Yn-2+4Yn-1+Yn]$
+
+where $h = (b - a)/n$, for some even integer $n$, and $yk = f(a +
+kh)$. (Increasing n increases the accuracy of the approximation.)
+Define a procedure that takes as arguments f, a, b, and n and returns
+the value of the integral, computed using Simpson's Rule. Use your
+procedure to integrate cube between 0 and 1 (with n = 100 and n =
+1000), and compare the results to those of the integral procedure
+shown above.
+
+* Solução
+
+#+BEGIN_SRC scheme
+  (define (cube x) (* x x x))
+
+  (define (sum term a next b)
+    (if (> a b)
+	0
+	(+ (term a)
+           (sum term (next a) next b))))
+         
+  (define (integral f a b dx)
+    (define (add-dx x) (+ x dx))
+    (* (sum f (+ a (/ dx 2.0)) add-dx b)
+       dx))
+     
+  (define (integral-2 f a b n) 
+    (define (add-dx z) (+ z (/ (- b a) n)))  
+    (define (sum-2 term x next y counter)
+      (cond ((> x y) 0)
+	    ((or (= counter 0) (= counter n))
+	     (+ (f x) (sum-2 f (add-dx x) add-dx y (+ counter 1))))
+	    ((even? counter) (+ (* 2 (f x)) (sum-2 f (add-dx x)
+						   add-dx y (+ counter 1))))
+	    (else (+ (* 4 (f x)) (sum-2 f (add-dx x)
+					add-dx y (+ counter 1))))))  
+    (* (sum-2 f a add-dx b 0)
+       (/ (/ (- b a) n) 3)))
+#+END_SRC

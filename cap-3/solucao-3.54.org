@@ -1,0 +1,100 @@
+#+Title: Solução do exercício 3.54 do SICP
+
+* Enunciado
+
+Define a procedure mul-streams, analogous to add-streams, that
+produces the elementwise product of its two input streams. Use this
+together with the stream of integers to complete the following
+definition of the stream whose nth element (counting from 0) is n + 1
+factorial:
+
+#+BEGIN_SRC 
+(define factorials
+  (stream-cons 1 (mul-streams <???> <???>)))
+#+END_SRC
+
+* Solução
+
+O exercício exige o uso de um =stream-map= generalizado para /N/
+streams. Utilizei o código do Alifer da /solucao-3.50.rkt/, apenas
+substituindo o =cons-stream=, =car-stream= e =cdr-stream= pelos seus
+equivalentes na documentação do Racket:
+
+#+BEGIN_SRC scheme
+(define (stream-map proc . argstreams)
+  (if (stream-empty? (car argstreams))
+      empty-stream
+      (stream-cons
+       (apply proc (map stream-first argstreams))
+       (apply stream-map
+              (cons proc (map stream-rest argstreams))))))
+#+END_SRC
+
+Em primeiro lugar, é preciso definir =mul-streams=. Análogo a
+=add-streams=, ele tem como /input/ duas streams e aplica o
+procedimento primitivo =*=.
+
+Assim:
+
+#+BEGIN_SRC scheme
+(define (mul-streams s1 s2) (stream-map * s1 s2))
+#+END_SRC
+
+Queremos, agora, modelar a fatorial de /n+1/, levando em consideração
+que a contagem deve começar em /n = 0/. Vamos utilizar o procedimento
+do SICP =add-streams= e as streams /ones/ e /integers/:
+
+#+BEGIN_SRC scheme
+(define (add-streams s1 s2) (stream-map + s1 s2))
+
+(define ones (stream-cons 1 ones))
+
+(define integers (stream-cons 1 (add-streams ones integers)))
+#+END_SRC
+
+Finalmente, temos a stream /factorials/: 
+
+#+BEGIN_SRC scheme
+
+(define factorials
+  (stream-cons 1 (mul-streams integers factorials)))
+#+END_SRC
+   
+* Teste
+
+Não consegui ser muito criativo nos testes. Se ninguém fizer antes,
+pretendo fazer um futuro PR com testes adequados (com alguma
+biblioteca de testes)
+
+** Teste do Mul-streams
+
+#+BEGIN_SRC scheme
+(define a integers)
+(define b integers)
+
+;; deveria retornar os quadrados dos integrais
+(define quadrado-dos-naturais (mul-streams a b)) 
+
+(define (teste)
+  (begin
+    (displayln (stream-first quadrado-dos-naturais))
+    (displayln (stream-first (stream-rest quadrado-dos-naturais)))
+    (displayln (stream-first (stream-rest (stream-rest quadrado-dos-naturais))))
+    (displayln (stream-first (stream-rest (stream-rest (stream-rest quadrado-dos-naturais)))))))
+
+(teste)
+#+END_SRC
+
+** Teste do Factorials
+
+#+BEGIN_SRC scheme
+(define (teste-factorials)
+  (begin
+    (displayln (stream-first factorial))
+    (displayln (stream-first (stream-rest factorials)))
+    (displayln (stream-first (stream-rest (stream-rest factorials))))
+    (displayln (stream-first (stream-rest(stream-rest (stream-rest factorials)))))))
+
+(teste-factorials)
+#+END_SRC 
+

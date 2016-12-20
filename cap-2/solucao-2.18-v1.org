@@ -1,0 +1,17 @@
+#+Title: Exercício 2.18
+#+Author: Yuri
+
+Define a procedure reverse that takes a list as argument and returns a
+list of the same elements in reverse order:
+
+#+BEGIN_EXAMPLE
+(reverse (list 1 4 9 16 25))
+(25 16 9 4 1)
+#+END_EXAMPLE
+
+#+BEGIN_SRC scheme
+(define (reverse lista)
+  (if (null? lista)
+      lista
+      (append (reverse (cdr lista)) (list (car lista)))))
+#+END_SRC

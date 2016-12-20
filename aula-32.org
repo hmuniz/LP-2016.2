@@ -1,0 +1,38 @@
+#+Title: Aula 32
+#+Date: <2016-11-09 Wed>
+
+Continuei a falar do projeto de uma biblioteca em Common Lisp para
+manipular arquivos [[http://universaldependencies.org/format.html][CoNLL-U]]. A biblioteca está agora no repositório:
+
+[[https://github.com/own-pt/cl-conllu]]
+
+Aprendemos no livro do SICP que construir camadas de abstração é uma
+importante disciplina de programação que permite modularidade e
+isolamento de partes do sistema. O meu código acima respeita esta
+modularidade? Onde poderia ser melhor?
+
+Em outras palavras, se eu decidir mudar a forma como represento
+sentenças e tokens, digamos, ao invés de usar classes usar apenas
+[[http://cl-cookbook.sourceforge.net/hashes.html][hash-tables]], quanto do resto do código do arquivo [[https://github.com/own-pt/cl-conllu/blob/master/read-write.lisp][read-write.lisp]]
+seria afetado? 
+
+E se eu resolvesse experimentar representar estas duas estruturas de
+dados como =structures=?
+
+#+BEGIN_SRC lisp
+  (defstruct token 
+    id form lemma upostag xpostag feats head deprel deps misc)
+
+  (defstruct sentence
+    start meta tokens)
+#+END_SRC
+
+O que precisaria ser mudado? Quais as partes mais difícieis de
+adaptar?
+
+Agora que as funções de leitura e escrita de arquivos CoNLL-U estão
+prontas, seria interessante começarmos a pensar em funções mais
+interessantes de validação de sentenças e filtro de uma lista de
+sentenças segundo algum critério. Uma inspiração inicial pode ser a
+seção de 'query' do [[http://www.gigamonkeys.com/book/practical-a-simple-database.html][cap 3 PCL]].
+

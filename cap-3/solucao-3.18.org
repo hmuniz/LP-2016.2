@@ -1,0 +1,116 @@
+#+Title: Exercício 3.18
+
+Write a procedure that examines a list and determines whether it
+contains a cycle, that is, whether a program that tried to find the
+end of the list by taking successive cdrs would go into an infinite
+loop. Exercise 3.13 constructed such lists.
+
+Para implementar listas mutáveis, utilizei a biblioteca
+[[https://docs.racket-lang.org/compatibility/mlists.html][compatibility/mlist]].
+
+A implementação da função =contains-cycle?= é feita de forma
+semelhante ao exercício 3.17, contendo uma função auxiliar que carrega
+a variável de estado =passed=, que contém os itens já passados na
+lista.  Utilizei o exemplo do exercício 3.13 para testar a função.
+
+#+BEGIN_SRC scheme
+(require compatibility/mlist)
+
+(define (mlast-pair x)
+  (if (null? (mcdr x))
+      x
+      (mlast-pair (mcdr x))))
+
+(define (make-cycle x)
+  (set-mcdr! (mlast-pair x) x)
+  x)
+
+(define (contains-cycle? x)
+  (let ((passed '()))
+    (define (aux x)
+      (cond ((empty? x) #f)
+            ((member x passed) #t)
+            (else (begin
+                (set! passed (cons x passed))
+                (aux (mcdr x))))))
+        (aux x)))
+        
+(define z (make-cycle (mlist 'a 'b 'c)))
+(contains-cycle? z)
+#+END_SRC
+
+Porém, da forma como a função foi definida, ela funciona estritamente
+para argumentos do tipo =mlist= (pois =aux= chama =mcdr=) Logo,
+coloquei um teste inicial para verificar se o argumento que a função
+recebe é =mlist=. Como somente =mlist= (ou =mcons=) pode ter ciclo,
+sempre que o argumento não for desse tipo a função retorna =#f=, sem
+chamar a função auxiliar.
+
+#+BEGIN_SRC scheme
+(require compatibility/mlist)
+
+(define (mlast-pair x)
+  (if (null? (mcdr x))
+      x
+      (mlast-pair (mcdr x))))
+
+(define (make-cycle x)
+  (set-mcdr! (mlast-pair x) x)
+  x)
+
+(define (contains-cycle? x)
+  (let ((passed '()))
+    (define (aux x)
+      (cond ((empty? x) #f)
+            ((member x passed) #t)
+            (else (begin
+                (set! passed (cons x passed))
+                (aux (mcdr x))))))
+    (if (not (mlist? x))
+        #f
+        (aux x))))
+        
+(define z (make-cycle (mlist 'a 'b 'c)))
+(define a (list 1 2 3))
+(contains-cycle? z)
+(contains-cycle? a)
+#+END_SRC
+
+O problema dessa implementação é que, quando definimos z como
+=(make-cycle (mlist 'a 'b 'c))=, o teste =(not (mlist? x))= dá
+verdadeiro, e a função retorna =#f=.  Ou seja, quando definimos z como
+um ciclo, ele deixa de ser =mlist=, mas os comandos =mcar= e =mcdr=
+ainda são aplicáveis.  Achei isso muito confuso.
+
+Para consertar esse último código, utilizei =with-handlers= para
+captar o erro em =mcdr=. O erro é de /contract violation/, que pode
+ser testado com [[https://docs.racket-lang.org/reference/exns.html][exn:fail:contract?]].
+
+#+BEGIN_SRC scheme
+(require compatibility/mlist)
+
+(define (mlast-pair x)
+  (if (null? (mcdr x))
+      x
+      (mlast-pair (mcdr x))))
+
+(define (make-cycle x)
+  (set-mcdr! (mlast-pair x) x)
+  x)
+
+(define (contains-cycle? x)
+  (with-handlers ((exn:fail:contract? (lambda (x) #f)))
+  (let ((passed '()))
+    (define (aux x)
+      (cond ((empty? x) #f)
+            ((member x passed) #t)
+            (else (begin
+                (set! passed (cons x passed))
+                (aux (mcdr x))))))
+        (aux x))))
+        
+(define z (make-cycle (mlist 'a 'b 'c)))
+(define a (list 1 2 3))
+(contains-cycle? z)
+(contains-cycle? a)
+#+END_SRC
